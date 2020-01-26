@@ -1,12 +1,14 @@
-const path = require('path')
+const path = require('path');
+const MiniCssExtractPlugin =  require('mini-css-extract-plugin');
 
+module.exports =(env)=> {
 
-const pathName = path.join(__dirname,'public');
+    const isProduction = env==='production';
 
-module.exports = {
+    return {
     entry: './src/app.js',
     output: {
-        path: pathName,
+        path: path.join(__dirname,'public'),
         filename: 'bundle.js'
     },
     module:{
@@ -16,14 +18,29 @@ module.exports = {
             exclude: /node_modules/
         },{
             test: /\.s?css$/,
-            use:[
-                'style-loader','css-loader','sass-loader'
-            ]
+            use:[MiniCssExtractPlugin.loader,
+                {
+                    loader: 'css-loader',
+                    options:{
+                        sourceMap: true
+                    }
+                },{
+                    loader:'sass-loader',
+                    options:{
+                        sourceMap: true
+                    }
+                }]
         }]
     },
-    devtool: 'cheap-module-eval-source-map',
+    plugins:[
+        new MiniCssExtractPlugin({
+            filename: 'styles.css'
+        })
+    ],
+    devtool: isProduction ? 'source-map' :'inline-source-map',
     devServer: {
         contentBase: path.join(__dirname,'public'),
         historyApiFallback: true  //tells server that we will use client side routing
     }
 };
+}
